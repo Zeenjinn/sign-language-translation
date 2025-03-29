@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';  
-import './Camera.css'; // CSS 파일 import  
+import './CSS/Camera.css'; // CSS 파일 import  
 
 const Camera = () => {  
   const videoRef = useRef(null);  
