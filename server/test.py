@@ -8,10 +8,10 @@ from collections import Counter
 # ============================
 # 모델 호출 & 인코더 로드
 # ============================
-model = load_model('4-1/종합설계/translation/sign_model.h5')
-encoder = joblib.load('4-1/종합설계/translation/label_encoder.pkl')
+model = load_model('sign_model_fixed.h5')
+encoder = joblib.load('label_encoder.pkl')
 
-# ============================
+# ============================ 
 # MediaPipe 초기화
 # ============================
 mp_pose = mp.solutions.pose
@@ -23,7 +23,7 @@ hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)
 # ============================
 # 테스트할 수어 영상 경로 (수정 실행)
 # ============================
-cap = cv2.VideoCapture('4-1/종합설계/SLV/오해4.mp4')
+cap = cv2.VideoCapture('Data_Preprocessing/SLV/오해4.mp4')
 
 sequence = []
 predictions = []
