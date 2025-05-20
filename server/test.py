@@ -8,8 +8,8 @@ from collections import Counter
 # ============================
 # 모델 호출 & 인코더 로드
 # ============================
-model = load_model('sign_model_fixed.h5')
-encoder = joblib.load('label_encoder.pkl')
+model = load_model('C:/Users/swj03/Vite/slt/server/sign_model_fixed.h5')
+encoder = joblib.load('C:/Users/swj03/Vite/slt/server/label_encoder.pkl')
 
 # ============================ 
 # MediaPipe 초기화
@@ -23,7 +23,7 @@ hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)
 # ============================
 # 테스트할 수어 영상 경로 (수정 실행)
 # ============================
-cap = cv2.VideoCapture('Data_Preprocessing/SLV/오해4.mp4')
+cap = cv2.VideoCapture('Data_Preprocessing/SLV/못생기다2.mp4')
 
 sequence = []
 predictions = []
@@ -74,9 +74,9 @@ while cap.isOpened():
         # 신뢰도 높은 경우만 저장
         if confidence > 0.8:
             predictions.append(pred_label)
-            print(f'🟢 예측 결과: {pred_label} ({confidence:.2f})')
+            print(f'예측 결과: {pred_label} ({confidence:.2f})')
         else:
-            print(f'🔹 무시됨: {pred_label} ({confidence:.2f})')
+            print(f'무시됨: {pred_label} ({confidence:.2f})')
 
         sequence = []
 
@@ -88,8 +88,8 @@ cv2.destroyAllWindows()
 # ============================
 if predictions:
     final_word = Counter(predictions).most_common(1)[0][0]
-    print(f'\n🎯 최종 번역 결과: {final_word}')
+    print(f'\n최종 번역 결과: {final_word}')
 else:
-    print("\n❗ 예측된 결과가 없습니다요.")
+    print("\n예측된 결과가 없습니다요.")
 
 

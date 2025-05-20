@@ -7,16 +7,24 @@ import os
 # 설정
 # ==============================
 label = '슬그머니'  # 저장할 수어 이름
-DATA_PATH = os.path.join('..', 'Data_Preprocessing', 'sign_data')
+
+# 현재 파일 경로 기준으로 데이터 경로 설정
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(CURRENT_DIR, 'sign_data')
+SLV_PATH = os.path.join(CURRENT_DIR, 'SLV')
+
 VIDEO_LIST = [
-    'Data_Preprocessing/SLV/슬그머니1.mp4'
+    os.path.join(SLV_PATH, '슬그머니1.mp4')
 ]
+
+# SLV 폴더 내 실제 파일 확인
+print("[DEBUG] SLV 폴더 내 파일 목록:")
+print(os.listdir(SLV_PATH))
 
 # 저장 폴더 생성
 save_dir = os.path.join(DATA_PATH, label)
 os.makedirs(save_dir, exist_ok=True)
 
-# 기존에 저장된 npy 개수부터 시작
 existing = os.listdir(save_dir)
 saved_count = len([f for f in existing if f.endswith('.npy')])
 
@@ -32,10 +40,16 @@ hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)
 # 영상 목록 처리
 # ==============================
 for video_path in VIDEO_LIST:
+    if not os.path.exists(video_path):
+        print(f"파일 없음: {video_path}")
+        continue
+
     cap = cv2.VideoCapture(video_path)
     sequence = []
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    print(f"[INFO] 영상 처리 시작: {video_path}")
+    print(f"\n[INFO] 영상 처리 시작: {video_path} | 총 프레임: {total_frames}")
+    valid_count = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -43,9 +57,7 @@ for video_path in VIDEO_LIST:
             break
 
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
         if image is None or image.shape[0] == 0 or image.shape[1] == 0:
-            print("⚠️ 이미지 shape 오류 → 건너뜀")
             continue
 
         image.flags.writeable = False
@@ -60,7 +72,7 @@ for video_path in VIDEO_LIST:
                 lm = pose_result.pose_landmarks.landmark[idx]
                 keypoints.extend([lm.x, lm.y, lm.z])
         else:
-            keypoints.extend([0]*18)
+            keypoints.extend([0] * 18)
 
         # 손
         if hands_result.multi_hand_landmarks:
@@ -69,24 +81,25 @@ for video_path in VIDEO_LIST:
                 for lm in hand.landmark:
                     keypoints.extend([lm.x, lm.y, lm.z])
             if len(detected_hands) == 1:
-                keypoints.extend([0]*63)
+                keypoints.extend([0] * 63)
         else:
-            keypoints.extend([0]*126)
+            keypoints.extend([0] * 126)
 
         if len(keypoints) != 144:
-            print(f"❗ 키포인트 길이 오류: {len(keypoints)}, 건너뜀")
             continue
 
         sequence.append(keypoints)
+        valid_count += 1
 
         if len(sequence) == 30:
             npy_path = os.path.join(save_dir, f'{saved_count}.npy')
             np.save(npy_path, np.array(sequence))
-            print(f"✅ {saved_count}.npy 저장 완료")
+            print(f"저장 완료: {saved_count}.npy")
             sequence = []
             saved_count += 1
 
     cap.release()
+    print(f"[완료] {video_path} | 처리 프레임 수: {total_frames} | 유효 프레임 수: {valid_count}")
 
-print(f"[🎉 완료] 총 저장된 시퀀스 수: {saved_count}")
+print(f"\n[전체 완료] 최종 저장된 시퀀스 수: {saved_count}")
 cv2.destroyAllWindows()
