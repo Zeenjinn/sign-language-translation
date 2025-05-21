@@ -6,7 +6,7 @@ import os
 # ==============================
 # 설정
 # ==============================
-label = '못생기다다'  # 저장할 수어 이름
+label = '못생기다'  # 저장할 수어 이름
 
 # 현재 파일 경로 기준으로 데이터 경로 설정
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,12 +16,11 @@ SLV_PATH = os.path.join(CURRENT_DIR, 'SLV')
 VIDEO_LIST = [
     os.path.join(SLV_PATH, '못생기다1.mp4'),
     os.path.join(SLV_PATH, '못생기다2.mp4'),
-    os.path.join(SLV_PATH, '못생기다다3.mp4')
+    os.path.join(SLV_PATH, '못생기다3.mp4'),
+    os.path.join(SLV_PATH, '못생기다4.mp4'),
+    os.path.join(SLV_PATH, '못생기다5.mp4'),
+    os.path.join(SLV_PATH, '못생기다6.mp4')
 ]
-
-# SLV 폴더 내 실제 파일 확인
-print("[DEBUG] SLV 폴더 내 파일 목록:")
-print(os.listdir(SLV_PATH))
 
 # 저장 폴더 생성
 save_dir = os.path.join(DATA_PATH, label)

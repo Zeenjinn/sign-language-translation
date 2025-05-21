@@ -17,10 +17,6 @@ VIDEO_LIST = [
     os.path.join(SLV_PATH, '어지럽다1.mp4')
 ]
 
-# SLV 폴더 내 실제 파일 확인
-print("[DEBUG] SLV 폴더 내 파일 목록:")
-print(os.listdir(SLV_PATH))
-
 # 저장 폴더 생성
 save_dir = os.path.join(DATA_PATH, label)
 os.makedirs(save_dir, exist_ok=True)

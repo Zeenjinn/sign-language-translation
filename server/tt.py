@@ -11,6 +11,9 @@ from collections import Counter
 model = load_model('C:/Users/swj03/Vite/slt/server/sign_model_fixed.h5')
 encoder = joblib.load('C:/Users/swj03/Vite/slt/server/label_encoder.pkl')
 
+# 라벨 순서 확인
+print("현재 사용 중인 라벨 순서:", encoder.classes_)
+
 # ============================
 # MediaPipe 초기화
 # ============================
@@ -21,9 +24,9 @@ pose = mp_pose.Pose()
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2)
 
 # ============================
-# 테스트할 수어 영상 경로 (수정 실행)
+# 테스트할 수어 영상 경로
 # ============================
-cap = cv2.VideoCapture('C:/Users/swj03/Vite/slt/server/Data_Preprocessing/SLV/오해2.mp4')
+cap = cv2.VideoCapture(0)  # 웹캠으로 실시간 입력 받기
 
 sequence = []
 predictions = []
@@ -59,34 +62,47 @@ while cap.isOpened():
     else:
         keypoints.extend([0]*126)
 
-    # 누락 방지
+    # keypoints 정보 출력
+    print(f"[DEBUG] keypoints 길이: {len(keypoints)}, 평균: {np.mean(keypoints):.4f}, std: {np.std(keypoints):.4f}")
+
     if len(keypoints) != 144:
         continue
 
     sequence.append(keypoints)
+    print(f"[DEBUG] 시퀀스 길이: {len(sequence)}")
 
     if len(sequence) == 30:
-        input_data = np.expand_dims(sequence, axis=0)  # (1, 30, 144)
+        input_data = np.expand_dims(sequence, axis=0)
         prediction = model.predict(input_data)[0]
         confidence = np.max(prediction)
         pred_label = encoder.inverse_transform([np.argmax(prediction)])[0]
+
+        # 예측 출력
+        print(f"[DEBUG] softmax score: {prediction}")
+        print(f"[DEBUG] 예측: {pred_label}, 신뢰도: {confidence:.2f}")
 
         if confidence > 0.8:
             predictions.append(pred_label)
             print(f'예측 결과: {pred_label} ({confidence:.2f})')
         else:
-            print(f'무시됨: {pred_label} ({confidence:.2f})')
+            print(f'⚠️ 무시됨: {pred_label} ({confidence:.2f})')
 
         sequence = []
+
+    # 웹캠 창 출력 (선택)
+    cv2.imshow("Webcam", frame)
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        break
 
 cap.release()
 cv2.destroyAllWindows()
 
 # ============================
-# 최종 하나만 출력
+# 최종 결과
 # ============================
 if predictions:
+    print(f"\n전체 예측 리스트: {predictions}")
     final_word = Counter(predictions).most_common(1)[0][0]
-    print(f'\n최종 번역 결과: {final_word}')
+    print(f"\n최종 번역 결과: {final_word}")
 else:
-    print("\n예측된 결과가 없습니다요.")
+    print("\n예측된 결과가 없습니다.")
